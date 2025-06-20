@@ -169,3 +169,40 @@ export const updateProfile = async (req, res) => {
         console.log(error);
     }
 }
+
+import axios from "axios";
+
+export const getResume = async (req, res) => {
+    try {
+      const userId = req.id;
+      console.log("Fetching resume for user:", userId);
+  
+      const user = await User.findById(userId);
+  
+      if (!user) {
+        console.log("User not found");
+        return res.status(404).json({ message: "User not found", success: false });
+      }
+  
+      if (!user.profile.resume) {
+        console.log("Resume not found for user");
+        return res.status(404).json({ message: "Resume not found", success: false });
+      }
+  
+      const resumeUrl = user.profile.resume;
+      console.log(resumeUrl);
+      const fileResponse = await axios.get(resumeUrl, { responseType: "stream" });
+  
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${user.profile.resumeOriginalName || "resume.pdf"}"`
+      );
+      res.setHeader("Content-Type", fileResponse.headers["content-type"]);
+  
+      fileResponse.data.pipe(res);
+    } catch (error) {
+      console.error("Resume download error:", error.message);
+      return res.status(500).json({ message: "Internal Server Error", success: false });
+    }
+  };
+  

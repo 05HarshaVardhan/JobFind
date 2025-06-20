@@ -17,6 +17,34 @@ const Profile = () => {
     useGetAppliedJobs();
     const [open, setOpen] = useState(false);
     const {user} = useSelector(store=>store.auth);
+    const handleResumeDownload = async () => {
+        try {
+          const response = await fetch("http://localhost:8000/api/v1/user/resume", {
+            method: "GET",
+            credentials: "include", // ✅ this sends cookies (token)
+          });
+      
+          if (!response.ok) {
+            throw new Error("Resume fetch failed");
+          }
+      
+          const blob = await response.blob(); // get the file data
+          const url = window.URL.createObjectURL(blob); // create a temporary URL
+      
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = user?.profile?.resumeOriginalName || "resume.pdf"; // fallback name
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(url); // cleanup
+        } catch (err) {
+          console.error(err);
+          alert("Failed to download resume.");
+        }
+      };
+      
+      
 
     return (
         <div>
@@ -55,7 +83,14 @@ const Profile = () => {
                 <div className='grid w-full max-w-sm items-center gap-1.5'>
                     <Label className="text-md font-bold">Resume</Label>
                     {
-                        isResume ? <a target='blank' href={user?.profile?.resume} className='text-blue-500 w-full hover:underline cursor-pointer'>{user?.profile?.resumeOriginalName}</a> : <span>NA</span>
+                        isResume ? <Button 
+                        onClick={handleResumeDownload}
+                        variant="link"
+                        className="text-blue-500 w-full hover:underline p-0"
+                      >
+                        {user?.profile?.resumeOriginalName}
+                      </Button>
+                       : <span>NA</span>
                     }
                 </div>
             </div>
