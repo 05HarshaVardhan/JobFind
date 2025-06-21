@@ -19,7 +19,7 @@ const Profile = () => {
     const {user} = useSelector(store=>store.auth);
     const handleResumeDownload = async () => {
         try {
-          const response = await fetch("http://localhost:8000/api/v1/user/resume", {
+          const response = await fetch("http://jobfind-f6u1.onrender.com/api/v1/user/resume", {
             method: "GET",
             credentials: "include", // ✅ this sends cookies (token)
           });
